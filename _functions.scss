@@ -1,0 +1,45 @@
+@function map-merge-deep($map1, $map2){
+    $k2: null;
+    $k1: null;
+    $new-map: ();
+
+    @for $key2 from 1 through length($map2) {
+        $value2: nth($map2, $key2);
+
+        @each $v2 in $value2 {
+            $i2: index($value2, $v2);
+
+            @if $i2 == 2 {
+                @if type-of($v2) == 'map' {
+                    $value1: map-get($map1, $k2);
+                    $merge: map-merge-deep($value1, $v2);
+
+                    $new: ($k2: $merge);
+                    $new-map: map-merge($new-map, $new);
+                } @else {
+                    @if map-has-key($map1, $k2){
+                        @for $key1 from 1 through length($map1){
+                            $value1: nth($map1, $key1);
+                            $i1: 1;
+                            @each $v1 in $value1 {
+                                @if $i1 == 2 {
+                                    @if $k1 == $k2 {
+                                        $new: ($k1: $v2);
+                                        $new-map: map-merge($new-map, $new);
+                                    }
+                                } @else {
+                                    $k1: $v1;
+                                    $i1: 2;
+                                }
+                            }
+                        }
+                    }
+                }
+            } @else {
+                $k2: $v2;
+            }
+        }
+    }
+
+    @return map-merge($map1, $new-map);
+}
